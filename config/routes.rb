@@ -17,7 +17,11 @@ Rails.application.routes.draw do
           get 'search', to: 'books#search'
         end
       end
-      resources :borrows
+      resources :borrows do
+        member do
+          patch 'return_book', to: 'borrows#return_book'
+        end
+      end
     end
   end
 end
