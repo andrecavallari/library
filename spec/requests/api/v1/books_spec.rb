@@ -215,4 +215,57 @@ RSpec.describe "Api::V1::Books", type: :request do
       end
     end
   end
+
+  describe 'DELETE /destroy' do
+    subject(:action) { delete api_v1_book_path(book.id) }
+    let!(:book) { create(:book) }
+    let(:librarian) { create(:user, role: :librarian) }
+
+    context 'when user is not logged in' do
+      it 'returns an unauthorized status' do
+        expect { action }.not_to change(Book, :count)
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'when book does not exist' do
+      let(:book) { double('Book', id: 999) }
+      let(:user) { create(:user, role: :librarian) }
+      let(:token) { JsonWebToken.encode(id: user.id) }
+      subject(:action) { delete api_v1_book_path(book.id), headers: {
+        'Authorization': "Bearer #{token}"
+      }}
+
+      it 'returns a not found status' do
+        expect { action }.not_to change(Book, :count)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context 'when user is a member' do
+      let(:user) { create(:user, role: :member) }
+      let(:token) { JsonWebToken.encode(id: user.id) }
+
+      subject(:action) { delete api_v1_book_path(book.id), headers: {
+        'Authorization': "Bearer #{token}"
+      }}
+
+      it 'returns a forbidden status' do
+        expect { action }.not_to change(Book, :count)
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context 'when user is a librarian' do
+      subject(:action) { delete api_v1_book_path(book.id), headers: {
+        'Authorization': "Bearer #{token}"
+      }}
+      let(:token) { JsonWebToken.encode(id: librarian.id) }
+
+      it 'deletes the book' do
+        expect { action }.to change(Book, :count).by(-1)
+        expect(response).to have_http_status(:no_content)
+      end
+    end
+  end
 end

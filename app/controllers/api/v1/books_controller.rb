@@ -36,6 +36,16 @@ module Api
         end
       end
 
+      def destroy
+        authorize! :destroy, Book
+        book = Book.accessible_by(current_ability).find(params[:id])
+        if book.destroy
+          head :no_content
+        else
+          render json: { errors: book.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       private
         def book_params
           params.require(:book).permit(:title, :author, :genre, :isbn, :copies)
