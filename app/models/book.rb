@@ -19,6 +19,8 @@ class Book < ApplicationRecord
 
   before_save :update_tsvector
 
+  has_many :borrows, dependent: :destroy
+
   private
     def update_tsvector
       concatenated = [title, author, genre].compact.join(' ')

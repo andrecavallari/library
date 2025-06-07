@@ -3,6 +3,11 @@
 module Api
   module V1
     class BorrowsController < ApplicationController
+      def index
+        borrows = Borrow.accessible_by(current_ability).includes(:book, :user)
+        render json: borrows, include: [:book, :user]
+      end
+
       def create
         authorize! :create, Borrow
         borrow = Borrow.new
