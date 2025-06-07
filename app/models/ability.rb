@@ -8,8 +8,14 @@ class Ability
 
     if user.member?
       can :read, Book, ['copies > 0']
-    elsif user.librarian?
+      can :create, Borrow
+      can :read, Borrow, user_id: user.id
+    end
+
+    if user.librarian?
       can :manage, Book
     end
+
+    false
   end
 end
