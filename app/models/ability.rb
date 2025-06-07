@@ -14,6 +14,8 @@ class Ability
 
     if user.librarian?
       can :manage, Book
+      can :read, Borrow
+      can :update, Borrow
     end
 
     false

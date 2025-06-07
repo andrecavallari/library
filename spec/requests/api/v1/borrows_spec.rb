@@ -83,4 +83,48 @@ RSpec.describe 'API V1 Borrows', type: :request do
       end
     end
   end
+
+  describe 'GET /api/v1/borrows' do
+    context 'when user is unauthenticated' do
+      it 'returns unauthorized status' do
+        get api_v1_borrows_path
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'when user is logged in' do
+      let(:book1) { create(:book, copies: 2) }
+      let(:book2) { create(:book, copies: 1) }
+      let(:user1) { create(:user, :member) }
+      let(:user2) { create(:user, :member) }
+      let(:librarian) { create(:user, :librarian) }
+
+      before do
+        create(:borrow, user: user1, book: book1)
+        create(:borrow, user: user2, book: book2)
+      end
+
+      context 'when user is a member' do
+        before do
+          get api_v1_borrows_path, headers: authorize(user1)
+        end
+
+        it 'returns only the borrows of the user' do
+          expect(response).to have_http_status(:ok)
+          expect(json_response.size).to eq(1)
+        end
+      end
+
+      context 'when user is a librarian' do
+        before do
+          get api_v1_borrows_path, headers: authorize(librarian)
+        end
+
+        it 'returns all borrows' do
+          expect(response).to have_http_status(:ok)
+          expect(json_response.size).to eq(2)
+        end
+      end
+    end
+  end
 end
