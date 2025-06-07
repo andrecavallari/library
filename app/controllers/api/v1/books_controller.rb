@@ -46,6 +46,11 @@ module Api
         end
       end
 
+      def search
+        books = Book.accessible_by(current_ability).search(params[:query])
+        render json: books, status: :ok
+      end
+
       private
         def book_params
           params.require(:book).permit(:title, :author, :genre, :isbn, :copies)
