@@ -42,6 +42,73 @@ RSpec.describe "Api::V1::Books", type: :request do
     end
   end
 
+  describe "GET /show" do
+    subject(:action) { get api_v1_book_path(book.id), headers: { 'Authorization': "Bearer #{token}" } }
+    let(:book) { create(:book) }
+    let(:json_response) { JSON.parse(response.body) }
+    let(:token) { JsonWebToken.encode(id: user.id) }
+    let(:json_response) { JSON.parse(response.body) }
+
+    before do
+      action
+    end
+
+    context 'when user is not logged in' do
+      subject(:action) { get api_v1_book_path(book.id) }
+
+      it 'returns an unauthorized status' do
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'when book does not exist' do
+      let(:book) { double('Book', id: 999) }
+      let(:user) { create(:user, role: :member) }
+
+      it 'returns a not found status' do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context 'when user is a member and book is available' do
+      let(:user) { create(:user, role: :member) }
+
+      it 'returns the book details' do
+        expect(response).to have_http_status(:ok)
+        expect(json_response['title']).to eq(book.title)
+        expect(json_response['author']).to eq(book.author)
+      end
+    end
+
+    context 'when user is a member and book is unavailable' do
+      let(:user) { create(:user, role: :member) }
+      let(:book) { create(:book, :unavailable) }
+
+      it 'returns the book details' do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context 'when user is a librarian and book is unavailable' do
+      let(:user) { create(:user, role: :librarian) }
+      let(:book) { create(:book, :unavailable) }
+
+      it 'returns the book details' do
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context 'when user is a librarian and book is available' do
+      let(:user) { create(:user, role: :librarian) }
+
+      it 'returns the book details' do
+        expect(response).to have_http_status(:ok)
+        expect(json_response['title']).to eq(book.title)
+        expect(json_response['author']).to eq(book.author)
+      end
+    end
+  end
+
   describe "POST /create" do
     subject(:action) { post api_v1_books_path, params: valid_attributes }
     let(:member) { create(:user, role: :member) }

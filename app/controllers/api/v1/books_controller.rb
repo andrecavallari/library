@@ -8,6 +8,13 @@ module Api
         render json: books, status: :ok
       end
 
+      def show
+        book = Book.accessible_by(current_ability).find(params[:id])
+        render json: book, status: :ok
+      rescue ActiveRecord::RecordNotFound
+        render json: { error: 'Book not found' }, status: :not_found
+      end
+
       def create
         authorize! :create, Book
         book = Book.new(book_params)
