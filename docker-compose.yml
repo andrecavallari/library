@@ -1,0 +1,35 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://user:password@db/library
+      - RAILS_ENV=development
+    command: bundle exec rails server -b 0.0.0.0
+    volumes:
+      - .:/app
+    links:
+      - db
+    networks:
+      - library_network
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: library
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - library_network
+    ports:
+      - "5432:5432"
+volumes:
+  pg_data:
+networks:
+  library_network:
+    driver: bridge
