@@ -1,17 +1,15 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgres://user:password@db/library
       - RAILS_ENV=development
-    command: bundle exec rails server -b 0.0.0.0
+    command: bundle exec rails s -b 0.0.0.0
     volumes:
-      - .:/app
+      - .:/app:delegated
     links:
       - db
     networks:
