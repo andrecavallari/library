@@ -6,7 +6,7 @@ class Borrow < ApplicationRecord
 
   validates :user_id, presence: true
   validates :book_id, presence: true
-  validate :already_borrowed
+  validate :already_borrowed, on: :create
 
   scope :active, -> { where(returned_at: nil) }
   scope :overdue, -> { where('return_at < ?', Date.today).where(returned_at: nil) }
