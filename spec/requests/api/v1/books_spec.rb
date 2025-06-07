@@ -268,4 +268,46 @@ RSpec.describe "Api::V1::Books", type: :request do
       end
     end
   end
+
+  describe "GET /search" do
+    let(:librarian) { create(:user, role: :librarian) }
+    let(:token) { JsonWebToken.encode(id: librarian.id) }
+    let!(:book1) { create(:book, title: "Ruby on Rails", author: "David Heinemeier Hansson") }
+    let!(:book2) { create(:book, title: "Learn Ruby", author: "Chris Pine") }
+    let!(:book3) { create(:book, title: "JavaScript Basics", author: "John Doe") }
+
+    context 'when user is not logged in' do
+      it 'returns an unauthorized status' do
+        get search_api_v1_books_path, params: { query: 'Ruby' }
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'when user is a librarian' do
+      before do
+        get search_api_v1_books_path, params: { query: 'Ruby' }, headers: { 'Authorization': "Bearer #{token}" }
+      end
+
+      it 'returns books matching the search query' do
+        expect(response).to have_http_status(:ok)
+        expect(json_response.size).to eq(2)
+        expect(json_response.pluck('title')).to include("Ruby on Rails", "Learn Ruby")
+      end
+    end
+
+    context 'when user is a member' do
+      let(:member) { create(:user, role: :member) }
+      let(:token) { JsonWebToken.encode(id: member.id) }
+
+      before do
+        get search_api_v1_books_path, params: { query: 'Ruby' }, headers: { 'Authorization': "Bearer #{token}" }
+      end
+
+      it 'returns books matching the search query' do
+        expect(response).to have_http_status(:ok)
+        expect(json_response.size).to eq(2)
+        expect(json_response.pluck('title')).to include("Ruby on Rails", "Learn Ruby")
+      end
+    end
+  end
 end

@@ -10,7 +10,11 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :books
+      resources :books do
+        collection do
+          get 'search', to: 'books#search'
+        end
+      end
       resources :auth, only: %i[create destroy]
       resources :users, only: [:create]
     end
