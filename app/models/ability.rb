@@ -4,10 +4,10 @@ class Ability
   include CanCan::Ability
 
   def initialize(user)
-    user ||= User.new # guest user (not logged in)
+    user ||= User.new
 
     if user.member?
-      can :read, Book, ['copies > 0'] # Members can read books that have copies available
+      can :read, Book, ['copies > 0']
     elsif user.librarian?
       can :manage, Book
     end
