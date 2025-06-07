@@ -127,4 +127,51 @@ RSpec.describe 'API V1 Borrows', type: :request do
       end
     end
   end
+
+  describe 'PATCH /api/v1/borrows/:id/return_book' do
+    let!(:user) { create(:user, :member) }
+    let!(:book) { create(:book, copies: 1) }
+    let!(:borrow) { create(:borrow, user:, book:) }
+
+    subject(:action) { patch return_book_api_v1_borrow_path(borrow), headers: authorize(user) }
+
+    context 'when user is unauthenticated' do
+      it 'returns unauthorized status' do
+        patch return_book_api_v1_borrow_path(borrow)
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'when user is a librarian' do
+      let(:user) { create(:user, :librarian) }
+
+      context 'when the book is not returned' do
+        it 'upadtes returned_at' do
+          expect { action }.to change { borrow.reload.returned_at }.from(nil).to(be_present)
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context 'when the book is already returned' do
+        before do
+          borrow.update(returned_at: Time.current)
+        end
+
+        it 'returns unprocessable entity status' do
+          expect { action }.not_to change { borrow.reload.returned_at }
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(json_response).to match('error' => 'Book already returned')
+        end
+      end
+    end
+
+    context 'when the user is a member' do
+      let(:user) { create(:user, :member) }
+
+      it 'returns forbidden' do
+        expect { action }.not_to change { borrow.reload.returned_at }.from(nil)
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+  end
 end
