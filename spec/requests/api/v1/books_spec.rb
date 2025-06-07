@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe "Api::V1::Books", type: :request do
+  let(:json_response) { JSON.parse(response.body) }
+
   describe "GET /index" do
     context 'when user is not logged in' do
       it 'returns an unauthorized status' do
@@ -45,9 +47,7 @@ RSpec.describe "Api::V1::Books", type: :request do
   describe "GET /show" do
     subject(:action) { get api_v1_book_path(book.id), headers: { 'Authorization': "Bearer #{token}" } }
     let(:book) { create(:book) }
-    let(:json_response) { JSON.parse(response.body) }
     let(:token) { JsonWebToken.encode(id: user.id) }
-    let(:json_response) { JSON.parse(response.body) }
 
     before do
       action
@@ -113,7 +113,6 @@ RSpec.describe "Api::V1::Books", type: :request do
     subject(:action) { post api_v1_books_path, params: valid_attributes }
     let(:member) { create(:user, role: :member) }
     let(:librarian) { create(:user, role: :librarian) }
-    let(:json_response) { JSON.parse(response.body) }
 
     let(:valid_attributes) do
       {
@@ -157,6 +156,61 @@ RSpec.describe "Api::V1::Books", type: :request do
       it 'creates a new book' do
         expect { action }.to change(Book, :count).by(1)
         expect(response).to have_http_status(:created)
+        expect(json_response['title']).to eq(valid_attributes[:book][:title])
+      end
+    end
+  end
+
+  describe "PUT /update" do
+    subject(:action) { put api_v1_book_path(book.id), params: valid_attributes }
+    let(:book) { create(:book) }
+    let(:librarian) { create(:user, role: :librarian) }
+    let(:token) { JsonWebToken.encode(id: librarian.id) }
+
+    let(:valid_attributes) do
+      {
+        book: {
+          title: "Updated Book Title",
+          author: "Updated Author",
+          genre: "Updated Genre",
+          isbn: "0987654321",
+          copies: 5
+        }
+      }
+    end
+
+    context 'when user is not logged in' do
+      subject(:action) { put api_v1_book_path(book.id), params: valid_attributes }
+
+      it 'returns an unauthorized status' do
+        expect { action }.not_to change { book.reload.title }
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'when user is a member' do
+      let(:member) { create(:user, role: :member) }
+      let(:token) { JsonWebToken.encode(id: member.id) }
+
+      subject(:action) { put api_v1_book_path(book.id), params: valid_attributes, headers: {
+        'Authorization': "Bearer #{token}"
+      }}
+
+      it 'returns a forbidden status' do
+        expect { action }.not_to change { book.reload.title }
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context 'when user is a librarian' do
+      subject(:action) { put api_v1_book_path(book.id), params: valid_attributes, headers: {
+        'Authorization': "Bearer #{token}"
+      }}
+      let(:token) { JsonWebToken.encode(id: librarian.id) }
+
+      it 'updates the book' do
+        expect { action }.to change { book.reload.title }.to(valid_attributes[:book][:title])
+        expect(response).to have_http_status(:ok)
         expect(json_response['title']).to eq(valid_attributes[:book][:title])
       end
     end
