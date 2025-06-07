@@ -69,6 +69,18 @@ RSpec.describe 'API V1 Borrows', type: :request do
           expect(response).to have_http_status(:not_found)
         end
       end
+
+      context 'when the user already borrowed the book' do
+        before do
+          create(:borrow, user:, book:)
+        end
+
+        it 'returns unprocessable entity status' do
+          expect { action }.not_to change(Borrow, :count)
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(json_response).to match('base' => ['You have already borrowed this book'])
+        end
+      end
     end
   end
 end
