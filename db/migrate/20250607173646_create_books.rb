@@ -1,6 +1,7 @@
 class CreateBooks < ActiveRecord::Migration[8.0]
   def up
     create_table :books do |t|
+      t.integer :copies, default: 0, null: false
       t.string :title, null: false
       t.string :author, null: false
       t.string :genre, null: false
