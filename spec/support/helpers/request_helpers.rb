@@ -10,7 +10,7 @@ module Helpers
 
     def authorize(user)
       token = JsonWebToken.encode(id: user.id)
-      {'Authorization': "Bearer #{token}"}
+      { 'Authorization': "Bearer #{token}" }
     end
   end
 end
