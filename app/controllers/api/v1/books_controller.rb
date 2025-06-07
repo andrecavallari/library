@@ -26,6 +26,16 @@ module Api
         end
       end
 
+      def update
+        authorize! :update, Book
+        book = Book.accessible_by(current_ability).find(params[:id])
+        if book.update(book_params)
+          render json: book, status: :ok
+        else
+          render json: { errors: book.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       private
         def book_params
           params.require(:book).permit(:title, :author, :genre, :isbn, :copies)
