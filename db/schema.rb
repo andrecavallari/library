@@ -15,6 +15,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_07_173646) do
   enable_extension "pg_catalog.plpgsql"
 
   create_table "books", force: :cascade do |t|
+    t.integer "copies", default: 0, null: false
     t.string "title", null: false
     t.string "author", null: false
     t.string "genre", null: false

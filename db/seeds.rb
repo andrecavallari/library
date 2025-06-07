@@ -14,3 +14,23 @@ User.where(email: 'john@domain.com').first_or_create do |user|
   user.password_confirmation = 'password123'
   user.role = :librarian
 end
+
+(1..5).each do |i|
+  User.create!(
+    name: Faker::Name.name,
+    email: Faker::Internet.unique.email,
+    password: 'password123',
+    password_confirmation: 'password123',
+    role: :member
+  )
+end
+
+(1..10).each do |i|
+  Book.create!(
+    copies: rand(1..5),
+    title: Faker::Book.title,
+    author: Faker::Book.author,
+    genre: Faker::Book.genre,
+    isbn: Faker::Code.unique.isbn,
+  )
+end
