@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe 'API V1 Borrows', type: :request do
   describe 'POST /api/v1/borrows' do
     let!(:user) { create(:user, :member) }
-    let!(:book) { create(:book, copies: 1) }
+    let!(:book) { create(:book, copies: 10) }
     let(:params) do
       {
         borrow: {
@@ -79,6 +79,21 @@ RSpec.describe 'API V1 Borrows', type: :request do
           expect { action }.not_to change(Borrow, :count)
           expect(response).to have_http_status(:unprocessable_entity)
           expect(json_response).to match('base' => ['You have already borrowed this book'])
+        end
+      end
+
+      context 'when the user has reached the borrow limit' do
+        let(:another_user) { create(:user, :member) }
+
+        before do
+          book.update_column(:copies, 1)
+          create(:borrow, book:, user: another_user)
+        end
+
+        it 'returns unprocessable entity status' do
+          expect { action }.not_to change(Borrow, :count)
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(json_response).to match('error' => 'Book not available')
         end
       end
     end

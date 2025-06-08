@@ -12,8 +12,10 @@ module Api
         authorize! :create, Borrow
         borrow = Borrow.new
         book = Book.accessible_by(current_ability).find(borrow_params[:book_id])
-        borrow.user = current_user
-        borrow.book = book
+
+        return render json: { error: 'Book not available' }, status: :unprocessable_entity unless book.available?
+
+        borrow.assign_attributes(user: current_user, book:)
 
         if borrow.save
           render json: borrow, status: :created, include: [:book, :user]
