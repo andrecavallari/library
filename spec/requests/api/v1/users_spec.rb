@@ -11,10 +11,12 @@ RSpec.describe 'Api::V1::Users', type: :request do
       let!(:user) { create(:user, email: 'taken@domain.com') }
       let(:payload) do
         {
-          name: 'Test User',
-          email: user.email,
-          password: 'password123',
-          password_confirmation: 'password123'
+          user: {
+            name: 'Test User',
+            email: user.email,
+            password: 'password123',
+            password_confirmation: 'password123'
+          }
         }
       end
 
@@ -28,10 +30,12 @@ RSpec.describe 'Api::V1::Users', type: :request do
     context 'when password confirmation does not match' do
       let(:payload) do
         {
-          name: 'Test User',
-          email: 'john@doe.com',
-          password: 'password123',
-          password_confirmation: 'different_password'
+          user: {
+            name: 'Test User',
+            email: 'john@doe.com',
+            password: 'password123',
+            password_confirmation: 'different_password'
+          }
         }
       end
 
@@ -45,10 +49,12 @@ RSpec.describe 'Api::V1::Users', type: :request do
     context 'when email format is invalid' do
       let(:payload) do
         {
-          name: 'Test User',
-          email: 'invalid_email_format',
-          password: 'password123',
-          password_confirmation: 'password123'
+          user:{
+            name: 'Test User',
+            email: 'invalid_email_format',
+            password: 'password123',
+            password_confirmation: 'password123'
+          }
         }
       end
 
@@ -62,10 +68,12 @@ RSpec.describe 'Api::V1::Users', type: :request do
     context 'when payload is all ok and user does not exists' do
       let(:payload) do
         {
-          name: 'Test User',
-          email: 'john@doe.com',
-          password: 'password123',
-          password_confirmation: 'password123'
+          user: {
+            name: 'Test User',
+            email: 'john@doe.com',
+            password: 'password123',
+            password_confirmation: 'password123'
+          }
         }
       end
 
