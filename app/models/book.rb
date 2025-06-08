@@ -21,6 +21,8 @@ class Book < ApplicationRecord
 
   has_many :borrows, dependent: :destroy
 
+  def available? = copies > 0 && active_borrows_count < copies
+
   private
     def update_tsvector
       concatenated = [title, author, genre].compact.join(' ')
