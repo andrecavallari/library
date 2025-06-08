@@ -1,8 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe "Api::V1::Books", type: :request do
-  let(:json_response) { JSON.parse(response.body) }
-
   describe "GET /index" do
     context 'when user is not logged in' do
       it 'returns an unauthorized status' do
@@ -13,12 +11,11 @@ RSpec.describe "Api::V1::Books", type: :request do
 
     context 'when user is a member' do
       let(:member) { create(:user, role: :member) }
-      let(:token) { JsonWebToken.encode(id: member.id) }
 
       before do
         create_list(:book, 3)
         create_list(:book, 2, :unavailable)
-        get api_v1_books_path, headers: { 'Authorization': "Bearer #{token}" }
+        get api_v1_books_path, headers: authorize(member)
       end
 
       it 'returns a list of available books' do
@@ -29,12 +26,11 @@ RSpec.describe "Api::V1::Books", type: :request do
 
     context 'when user is a librarian' do
       let(:librarian) { create(:user, role: :librarian) }
-      let(:token) { JsonWebToken.encode(id: librarian.id) }
 
       before do
         create_list(:book, 5)
         create_list(:book, 2, :unavailable)
-        get api_v1_books_path, headers: { 'Authorization': "Bearer #{token}" }
+        get api_v1_books_path, headers: authorize(librarian)
       end
 
       it 'returns a list of all books' do
@@ -45,9 +41,8 @@ RSpec.describe "Api::V1::Books", type: :request do
   end
 
   describe "GET /show" do
-    subject(:action) { get api_v1_book_path(book.id), headers: { 'Authorization': "Bearer #{token}" } }
+    subject(:action) { get api_v1_book_path(book.id), headers: authorize(user) }
     let(:book) { create(:book) }
-    let(:token) { JsonWebToken.encode(id: user.id) }
 
     before do
       action
@@ -134,11 +129,7 @@ RSpec.describe "Api::V1::Books", type: :request do
     end
 
     context 'when user is a member' do
-      subject(:action) { post api_v1_books_path, params: valid_attributes, headers: {
-        'Authorization': "Bearer #{token}"
-      }}
-
-      let(:token) { JsonWebToken.encode(id: member.id) }
+      subject(:action) { post api_v1_books_path, params: valid_attributes, headers: authorize(member) }
 
       it 'returns a forbidden status' do
         expect { action }.not_to change(Book, :count)
@@ -147,11 +138,7 @@ RSpec.describe "Api::V1::Books", type: :request do
     end
 
     context 'when user is a librarian' do
-      subject(:action) { post api_v1_books_path, params: valid_attributes, headers: {
-        'Authorization': "Bearer #{token}"
-      }}
-
-      let(:token) { JsonWebToken.encode(id: librarian.id) }
+      subject(:action) { post api_v1_books_path, params: valid_attributes, headers: authorize(librarian) }
 
       it 'creates a new book' do
         expect { action }.to change(Book, :count).by(1)
@@ -165,7 +152,6 @@ RSpec.describe "Api::V1::Books", type: :request do
     subject(:action) { put api_v1_book_path(book.id), params: valid_attributes }
     let(:book) { create(:book) }
     let(:librarian) { create(:user, role: :librarian) }
-    let(:token) { JsonWebToken.encode(id: librarian.id) }
 
     let(:valid_attributes) do
       {
@@ -190,11 +176,7 @@ RSpec.describe "Api::V1::Books", type: :request do
 
     context 'when user is a member' do
       let(:member) { create(:user, role: :member) }
-      let(:token) { JsonWebToken.encode(id: member.id) }
-
-      subject(:action) { put api_v1_book_path(book.id), params: valid_attributes, headers: {
-        'Authorization': "Bearer #{token}"
-      }}
+      subject(:action) { put api_v1_book_path(book.id), params: valid_attributes, headers: authorize(member) }
 
       it 'returns a forbidden status' do
         expect { action }.not_to change { book.reload.title }
@@ -203,10 +185,7 @@ RSpec.describe "Api::V1::Books", type: :request do
     end
 
     context 'when user is a librarian' do
-      subject(:action) { put api_v1_book_path(book.id), params: valid_attributes, headers: {
-        'Authorization': "Bearer #{token}"
-      }}
-      let(:token) { JsonWebToken.encode(id: librarian.id) }
+      subject(:action) { put api_v1_book_path(book.id), params: valid_attributes, headers: authorize(librarian) }
 
       it 'updates the book' do
         expect { action }.to change { book.reload.title }.to(valid_attributes[:book][:title])
@@ -231,10 +210,7 @@ RSpec.describe "Api::V1::Books", type: :request do
     context 'when book does not exist' do
       let(:book) { double('Book', id: 999) }
       let(:user) { create(:user, role: :librarian) }
-      let(:token) { JsonWebToken.encode(id: user.id) }
-      subject(:action) { delete api_v1_book_path(book.id), headers: {
-        'Authorization': "Bearer #{token}"
-      }}
+      subject(:action) { delete api_v1_book_path(book.id), headers: authorize(user) }
 
       it 'returns a not found status' do
         expect { action }.not_to change(Book, :count)
@@ -244,11 +220,7 @@ RSpec.describe "Api::V1::Books", type: :request do
 
     context 'when user is a member' do
       let(:user) { create(:user, role: :member) }
-      let(:token) { JsonWebToken.encode(id: user.id) }
-
-      subject(:action) { delete api_v1_book_path(book.id), headers: {
-        'Authorization': "Bearer #{token}"
-      }}
+      subject(:action) { delete api_v1_book_path(book.id), headers: authorize(user) }
 
       it 'returns a forbidden status' do
         expect { action }.not_to change(Book, :count)
@@ -257,10 +229,7 @@ RSpec.describe "Api::V1::Books", type: :request do
     end
 
     context 'when user is a librarian' do
-      subject(:action) { delete api_v1_book_path(book.id), headers: {
-        'Authorization': "Bearer #{token}"
-      }}
-      let(:token) { JsonWebToken.encode(id: librarian.id) }
+      subject(:action) { delete api_v1_book_path(book.id), headers: authorize(librarian) }
 
       it 'deletes the book' do
         expect { action }.to change(Book, :count).by(-1)
@@ -271,7 +240,6 @@ RSpec.describe "Api::V1::Books", type: :request do
 
   describe "GET /search" do
     let(:librarian) { create(:user, role: :librarian) }
-    let(:token) { JsonWebToken.encode(id: librarian.id) }
     let!(:book1) { create(:book, title: "Ruby on Rails", author: "David Heinemeier Hansson") }
     let!(:book2) { create(:book, title: "Learn Ruby", author: "Chris Pine") }
     let!(:book3) { create(:book, title: "JavaScript Basics", author: "John Doe") }
@@ -285,7 +253,7 @@ RSpec.describe "Api::V1::Books", type: :request do
 
     context 'when user is a librarian' do
       before do
-        get search_api_v1_books_path, params: { query: 'Ruby' }, headers: { 'Authorization': "Bearer #{token}" }
+        get search_api_v1_books_path, params: { query: 'Ruby' }, headers: authorize(librarian)
       end
 
       it 'returns books matching the search query' do
@@ -297,10 +265,9 @@ RSpec.describe "Api::V1::Books", type: :request do
 
     context 'when user is a member' do
       let(:member) { create(:user, role: :member) }
-      let(:token) { JsonWebToken.encode(id: member.id) }
 
       before do
-        get search_api_v1_books_path, params: { query: 'Ruby' }, headers: { 'Authorization': "Bearer #{token}" }
+        get search_api_v1_books_path, params: { query: 'Ruby' }, headers: authorize(member)
       end
 
       it 'returns books matching the search query' do

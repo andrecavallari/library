@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'Api::V1::Users', type: :request do
   describe 'POST /api/v1/users' do
-    subject(:action) { post '/api/v1/users', params: payload }
+    subject(:action) { post api_v1_users_path, params: payload }
     let(:json_response) { JSON.parse(response.body) }
 
     context 'when email is already taken' do
