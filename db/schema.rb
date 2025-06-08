@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_07_201232) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_07_235400) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,6 +23,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_07_201232) do
     t.tsvector "tsv"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "active_borrows_count", default: 0, null: false
     t.index ["isbn"], name: "index_books_on_isbn", unique: true
     t.index ["tsv"], name: "index_books_on_tsv", using: :gin
   end

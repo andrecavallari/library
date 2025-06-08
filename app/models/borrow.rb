@@ -3,6 +3,11 @@
 class Borrow < ApplicationRecord
   belongs_to :user
   belongs_to :book
+  counter_culture :book,
+    column_name: proc { |model| model.returned_at? ? nil : 'active_borrows_count' },
+    column_names: {
+      'returned_at IS NULL' => 'active_borrows_count'
+    }
 
   validates :user_id, presence: true
   validates :book_id, presence: true
@@ -12,9 +17,7 @@ class Borrow < ApplicationRecord
   scope :overdue, -> { where('return_at < ?', Date.today).where(returned_at: nil) }
   scope :returned, -> { where.not(returned_at: nil) }
 
-  def return_book!
-    update(returned_at: Time.current)
-  end
+  def return_book! = update(returned_at: Time.current)
 
   private
     def already_borrowed
