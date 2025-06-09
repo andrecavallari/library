@@ -20,7 +20,12 @@ class Borrow < ApplicationRecord
 
   def overdue? = return_at < Date.today && returned_at.blank?
   def due_today? = return_at == Date.today && returned_at.blank?
-  def return_book! = update(returned_at: Time.current)
+
+  def return_book!
+    return if returned_at.present?
+
+    update(returned_at: Time.current)
+  end
 
   private
     def already_borrowed
