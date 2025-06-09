@@ -16,7 +16,10 @@ class Borrow < ApplicationRecord
   scope :active, -> { where(returned_at: nil) }
   scope :overdue, -> { where('return_at < ?', Date.today).where(returned_at: nil) }
   scope :returned, -> { where.not(returned_at: nil) }
+  scope :due_today, -> { where(return_at: Date.today, returned_at: nil) }
 
+  def overdue? = return_at < Date.today && returned_at.blank?
+  def due_today? = return_at == Date.today && returned_at.blank?
   def return_book! = update(returned_at: Time.current)
 
   private
