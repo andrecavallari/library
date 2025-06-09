@@ -11,6 +11,7 @@ Rails.application.routes.draw do
           patch 'return_book', to: 'borrows#return_book'
         end
       end
+      resources :dashboard, only: [:index]
     end
   end
 end
