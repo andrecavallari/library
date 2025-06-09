@@ -93,6 +93,10 @@ Authorization: Bearer jwt_token_here
 - Members: Lists available books.
 - Librarians: Lists all books.
 
+### Search Books
+**GET /api/v1/books?query=Ruby**
+Returns a list of books matching the search query.
+
 #### Show Book
 
 **GET /api/v1/books/:id**
@@ -123,10 +127,6 @@ Returns details for a specific book.
 
 **DELETE /api/v1/books/:id**
 
-#### Search Books
-
-**GET /api/v1/books/search?query=Ruby**
-
 ---
 
 ### Borrows
@@ -153,6 +153,17 @@ Returns details for a specific book.
 #### Return a Book
 
 **PATCH /api/v1/borrows/:id/return_book**
+
+---
+
+### Dashboard
+
+**GET /api/v1/dashboard**
+
+For librarians it returns statistics about the library, such as total books, total borrows, overdue books, etc.
+
+For members it returns current borrows and with due dates and possible overdue books.
+
 
 ---
 
