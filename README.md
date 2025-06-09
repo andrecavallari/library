@@ -14,8 +14,8 @@ This will start the Rails application and the PostgreSQL database. The applicati
 
 ## User Roles
 
-- **Librarian**: Can manage books and view all borrows.
-- **Member**: Can borrow/return books and view their own borrows.
+- **Librarian**: Can manage books, view all borrows and return books.
+- **Member**: Can borrow books and view their own borrows.
 
 ---
 
