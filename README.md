@@ -1,5 +1,17 @@
 # Library Management API
 
+## Starting up the project.
+
+To start the project you just need to have Docker in your machine then run:
+
+```sh
+docker-compose up
+```
+
+After docker is up, you need to run the database create command `bin/rails db:create` and then run the migrations with `bin/rails db:migrate`, optionally you can seed the database with `bin/rails db:seed`.
+
+This will start the Rails application and the PostgreSQL database. The application will be available at `http://localhost:3000`.
+
 ## User Roles
 
 - **Librarian**: Can manage books and view all borrows.
