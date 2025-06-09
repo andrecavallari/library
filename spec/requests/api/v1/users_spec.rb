@@ -49,7 +49,7 @@ RSpec.describe 'Api::V1::Users', type: :request do
     context 'when email format is invalid' do
       let(:payload) do
         {
-          user:{
+          user: {
             name: 'Test User',
             email: 'invalid_email_format',
             password: 'password123',
