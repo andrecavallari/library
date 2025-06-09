@@ -17,7 +17,7 @@ end
 
 (1..5).each do |i|
   User.create!(
-    name: Faker::Name.name,
+    name: Faker::Name.unique.name,
     email: Faker::Internet.unique.email,
     password: 'password123',
     password_confirmation: 'password123',
@@ -28,7 +28,7 @@ end
 (1..10).each do |i|
   Book.create!(
     copies: rand(1..5),
-    title: Faker::Book.title,
+    title: Faker::Book.unique.title,
     author: Faker::Book.author,
     genre: Faker::Book.genre,
     isbn: Faker::Code.unique.isbn,
