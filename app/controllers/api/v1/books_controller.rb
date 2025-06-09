@@ -5,6 +5,7 @@ module Api
     class BooksController < ApplicationController
       def index
         books = Book.accessible_by(current_ability)
+        books = books.search(params[:query]) if params[:query].present?
         render json: books, status: :ok
       end
 
@@ -44,11 +45,6 @@ module Api
         else
           render json: { errors: book.errors.full_messages }, status: :unprocessable_entity
         end
-      end
-
-      def search
-        books = Book.accessible_by(current_ability).search(params[:query])
-        render json: books, status: :ok
       end
 
       private
