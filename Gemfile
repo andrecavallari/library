@@ -15,7 +15,7 @@ gem "thruster", require: false
 gem "dotenv", "~> 3.1"
 gem "bcrypt", "~> 3.1"
 gem "warden", "~> 1.2"
-gem "jwt", "~> 2.10"
+gem "jwt", "~> 3.0"
 gem "cancancan", "~> 3.6"
 gem "pg_search", "~> 2.3"
 gem "counter_culture", "~> 3.10"
