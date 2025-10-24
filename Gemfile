@@ -18,7 +18,7 @@ gem "warden", "~> 1.2"
 gem "jwt", "~> 2.10"
 gem "cancancan", "~> 3.6"
 gem "pg_search", "~> 2.3"
-gem "counter_culture", "~> 3.10"
+gem "counter_culture", "~> 3.11"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
